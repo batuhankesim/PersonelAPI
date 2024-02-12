@@ -180,5 +180,49 @@ namespace PersonelAPI.DAL
                 }
             }
         }
+
+        public async Task<List<Personel>> GetirPersonelTum()
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand command = new SqlCommand("prs_l_personeltum", connection))
+                {
+                    List<Personel> lstPersonel = new List<Personel>();
+
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    await connection.OpenAsync();
+
+                    DataTable dataTable = new DataTable();
+                    dataTable.Load(await command.ExecuteReaderAsync());
+
+                    if (dataTable.Rows.Count > 0)
+                    {
+
+                        foreach (DataRow row in dataTable.Rows)
+                        {
+                            Personel dbPersonel = new Personel
+                            {
+                                SicilNumarasi = Convert.ToInt32(row["sicilnumarasi"]),
+                                Ad = row["ad"].ToString(),
+                                Soyad = row["soyad"].ToString(),
+                                DepartmanKodu = Convert.ToInt32(row["departmankodu"]),
+                                DepartmanAdi = row["departmanadi"].ToString(),
+                                IseGirisTarihi = row["isegiristarihi"] != DBNull.Value ? Convert.ToDateTime(row["isegiristarihi"]) : DateTime.MinValue,
+                                IstenCikisTarihi = row["istencikistarihi"] != DBNull.Value ? Convert.ToDateTime(row["istencikistarihi"]) : DateTime.MinValue,
+                                Eposta = row["eposta"].ToString(),
+                                Cinsiyet = row["cinsiyet"].ToString(),
+                                GsmTelefon = row["gsmtelefon"].ToString(),
+                                TelefonSabit = row["telefonsabit"].ToString()
+                            };
+
+                            lstPersonel.Add(dbPersonel);
+                        }
+
+                    }
+                    return lstPersonel;
+                }
+            }
+        }
     }
 }

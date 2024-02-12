@@ -37,6 +37,26 @@ namespace PersonelAPI.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetirTum()
+        {
+            try
+            {
+                List<Personel> personel = await _context.GetirPersonelTum();
+
+                if (personel == null)
+                {
+                    return NotFound("personel bulunamadı.");
+                }
+
+                return Ok(personel);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Personel getirme sırasında bir hata oluştu: {ex.Message}");
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Ekle(Personel personel)
         {
@@ -65,7 +85,7 @@ namespace PersonelAPI.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{sicilnumarasi}")]
         public async Task<IActionResult> Sil(Personel personel)
         {
             try
