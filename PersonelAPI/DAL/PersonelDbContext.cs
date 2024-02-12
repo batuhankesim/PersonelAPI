@@ -11,14 +11,14 @@ namespace PersonelAPI.DAL
 
         public PersonelDbContext(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("Server=localhost;Database=PersonelVeritabani;Trusted_Connection=True;TrustServerCertificate=true;");
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public Personel EklePersonel(Personel personel)
+        public async Task<Personel> EklePersonel(Personel personel)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                using (SqlCommand command = new SqlCommand("prs_i_personel",connection))
+                using (SqlCommand command = new SqlCommand("dbo.prs_i_personel",connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
 
@@ -28,30 +28,30 @@ namespace PersonelAPI.DAL
                     };
                     command.Parameters.Add(outputParameter);
 
-                    command.Parameters.AddWithValue("@ad", personel.Ad);
-                    command.Parameters.AddWithValue("@soyad", personel.Soyad);
+                    command.Parameters.AddWithValue("@ad", string.IsNullOrEmpty(personel.Ad) ? DBNull.Value : personel.Ad);
+                    command.Parameters.AddWithValue("@soyad", string.IsNullOrEmpty(personel.Soyad) ? DBNull.Value : personel.Soyad);
                     command.Parameters.AddWithValue("@departmankodu", personel.DepartmanKodu);
-                    command.Parameters.AddWithValue("@departmanadi", personel.DepartmanAdi);
-                    command.Parameters.AddWithValue("@isegiristarihi", personel.IseGirisTarihi);
-                    command.Parameters.AddWithValue("@istencikistarihi", personel.IstenCikisTarihi);
-                    command.Parameters.AddWithValue("@eposta", personel.Eposta);
-                    command.Parameters.AddWithValue("@cinsiyet", personel.Cinsiyet);
-                    command.Parameters.AddWithValue("@gsmtelefon", personel.GsmTelefon);
-                    command.Parameters.AddWithValue("@telefonsabit", personel.TelefonSabit);
+                    command.Parameters.AddWithValue("@departmanadi", string.IsNullOrEmpty(personel.DepartmanAdi) ? DBNull.Value : personel.DepartmanAdi);
+                    command.Parameters.AddWithValue("@isegiristarihi", personel.IseGirisTarihi == DateTime.MinValue ? DBNull.Value : personel.IseGirisTarihi);
+                    command.Parameters.AddWithValue("@istencikistarihi", personel.IstenCikisTarihi == DateTime.MinValue ? DBNull.Value: personel.IstenCikisTarihi);
+                    command.Parameters.AddWithValue("@eposta", string.IsNullOrEmpty(personel.Eposta) ? DBNull.Value : personel.Eposta);
+                    command.Parameters.AddWithValue("@cinsiyet", string.IsNullOrEmpty(personel.Cinsiyet) ? DBNull.Value : personel.Cinsiyet);
+                    command.Parameters.AddWithValue("@gsmtelefon", string.IsNullOrEmpty(personel.GsmTelefon) ? DBNull.Value : personel.GsmTelefon);
+                    command.Parameters.AddWithValue("@telefonsabit", string.IsNullOrEmpty(personel.TelefonSabit) ? DBNull.Value : personel.TelefonSabit);
 
-                    connection.Open();
-                    command.ExecuteNonQuery();
+                    await connection.OpenAsync();
+                    await command.ExecuteNonQueryAsync();
 
                     personel.SicilNumarasi = Convert.ToInt32(outputParameter.Value);
 
-                    connection.Close();
+                    await connection.CloseAsync();
 
                     return personel;
                 }
             }
         }
 
-        public void GuncelleCalisan(Personel personel)
+        public async Task GuncellePersonel(Personel personel)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -60,26 +60,26 @@ namespace PersonelAPI.DAL
                     command.CommandType = CommandType.StoredProcedure;
 
                     command.Parameters.AddWithValue("@sicilnumarasi", personel.SicilNumarasi);                                                       
-                    command.Parameters.AddWithValue("@ad", personel.Ad);
-                    command.Parameters.AddWithValue("@soyad", personel.Soyad);
+                    command.Parameters.AddWithValue("@ad", string.IsNullOrEmpty(personel.Ad) ? DBNull.Value : personel.Ad);
+                    command.Parameters.AddWithValue("@soyad", string.IsNullOrEmpty(personel.Soyad) ? DBNull.Value : personel.Soyad);
                     command.Parameters.AddWithValue("@departmankodu", personel.DepartmanKodu);
-                    command.Parameters.AddWithValue("@departmanadi", personel.DepartmanAdi);
-                    command.Parameters.AddWithValue("@isegiristarihi", personel.IseGirisTarihi);
-                    command.Parameters.AddWithValue("@istencikistarihi", personel.IstenCikisTarihi);
-                    command.Parameters.AddWithValue("@eposta", personel.Eposta);
-                    command.Parameters.AddWithValue("@cinsiyet", personel.Cinsiyet);
-                    command.Parameters.AddWithValue("@gsmtelefon", personel.GsmTelefon);
-                    command.Parameters.AddWithValue("@telefonsabit", personel.TelefonSabit);
+                    command.Parameters.AddWithValue("@departmanadi", string.IsNullOrEmpty(personel.DepartmanAdi) ? DBNull.Value : personel.DepartmanAdi);
+                    command.Parameters.AddWithValue("@isegiristarihi", personel.IseGirisTarihi == DateTime.MinValue ? DBNull.Value : personel.IseGirisTarihi);
+                    command.Parameters.AddWithValue("@istencikistarihi", personel.IstenCikisTarihi == DateTime.MinValue ? DBNull.Value : personel.IstenCikisTarihi);
+                    command.Parameters.AddWithValue("@eposta", string.IsNullOrEmpty(personel.Eposta) ? DBNull.Value : personel.Eposta);
+                    command.Parameters.AddWithValue("@cinsiyet", string.IsNullOrEmpty(personel.Cinsiyet) ? DBNull.Value : personel.Cinsiyet);
+                    command.Parameters.AddWithValue("@gsmtelefon", string.IsNullOrEmpty(personel.GsmTelefon) ? DBNull.Value : personel.GsmTelefon);
+                    command.Parameters.AddWithValue("@telefonsabit", string.IsNullOrEmpty(personel.TelefonSabit) ? DBNull.Value : personel.TelefonSabit);
 
-                    connection.Open();
-                    command.ExecuteNonQuery();
+                    await connection.OpenAsync();
+                    await command.ExecuteNonQueryAsync();
 
-                    connection.Close();
+                    await connection.CloseAsync();
                 }
             }
         }
 
-        public void SilPersonel(Personel personel)
+        public async Task SilPersonel(Personel personel)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -89,15 +89,52 @@ namespace PersonelAPI.DAL
 
                     command.Parameters.AddWithValue("@sicilnumarasi", personel.SicilNumarasi);
 
-                    connection.Open();
-                    command.ExecuteNonQuery();
+                    await connection.OpenAsync();
+                    await command.ExecuteNonQueryAsync();
 
-                    connection.Close();
+                    await connection.CloseAsync();
                 }
             }
         }
 
-        public List<Personel> GetirPersonel(Personel personel)
+        public async Task<Personel> OkuPersonel(Personel personel)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand command = new SqlCommand("prs_s_personel", connection))
+                {                  
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@sicilnumarasi", personel.SicilNumarasi);
+ 
+
+                    await connection.OpenAsync();
+
+                    DataTable dataTable = new DataTable();
+                    dataTable.Load(await command.ExecuteReaderAsync());
+
+                    if (dataTable.Rows.Count > 0)
+                    {
+                        personel = new Personel
+                        {
+                            SicilNumarasi = Convert.ToInt32(dataTable.Rows[0]["sicilnumarasi"]),
+                            Ad = dataTable.Rows[0]["ad"].ToString(),
+                            Soyad = dataTable.Rows[0]["soyad"].ToString(),
+                            DepartmanKodu = Convert.ToInt32(dataTable.Rows[0]["departmankodu"]),
+                            DepartmanAdi = dataTable.Rows[0]["departmanadi"].ToString(),
+                            IseGirisTarihi = dataTable.Rows[0]["isegiristarihi"] != DBNull.Value ? Convert.ToDateTime(dataTable.Rows[0]["isegiristarihi"]) : DateTime.MinValue,
+                            IstenCikisTarihi = dataTable.Rows[0]["istencikistarihi"] != DBNull.Value ? Convert.ToDateTime(dataTable.Rows[0]["istencikistarihi"]) : DateTime.MinValue,
+                            Eposta = dataTable.Rows[0]["eposta"].ToString(),
+                            Cinsiyet = dataTable.Rows[0]["cinsiyet"].ToString(),
+                            GsmTelefon = dataTable.Rows[0]["gsmtelefon"].ToString(),
+                            TelefonSabit = dataTable.Rows[0]["telefonsabit"].ToString()
+                        };
+                    }
+                    return personel;
+                }
+            }
+        }
+
+        public async Task<List<Personel>> GetirPersonel(Personel personel)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -110,15 +147,14 @@ namespace PersonelAPI.DAL
                     command.Parameters.AddWithValue("@departmankodu", personel.DepartmanKodu);
                     command.Parameters.AddWithValue("@isegiristarihi", personel.IseGirisTarihi);
 
-                    connection.Open();
+                    await connection.OpenAsync();
 
                     DataTable dataTable = new DataTable();
-                    dataTable.Load(command.ExecuteReader());
+                    dataTable.Load(await command.ExecuteReaderAsync());
 
                     if (dataTable.Rows.Count > 0)
                     {
                         
-
                         foreach (DataRow row in dataTable.Rows)
                         {
                             Personel dbPersonel = new Personel
@@ -128,7 +164,7 @@ namespace PersonelAPI.DAL
                                 Soyad = row["soyad"].ToString(),
                                 DepartmanKodu = Convert.ToInt32(row["departmankodu"]),
                                 DepartmanAdi = row["departmanadi"].ToString(),
-                                IseGirisTarihi = Convert.ToDateTime(row["isegiristarihi"]),
+                                IseGirisTarihi = row["isegiristarihi"] != DBNull.Value ? Convert.ToDateTime(row["isegiristarihi"]) : DateTime.MinValue,
                                 IstenCikisTarihi = row["istencikistarihi"] != DBNull.Value ? Convert.ToDateTime(row["istencikistarihi"]) : DateTime.MinValue,
                                 Eposta = row["eposta"].ToString(),
                                 Cinsiyet = row["cinsiyet"].ToString(),
